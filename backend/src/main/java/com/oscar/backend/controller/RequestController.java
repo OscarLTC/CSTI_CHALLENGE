@@ -6,7 +6,6 @@ import com.oscar.backend.service.RequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,19 +30,28 @@ public class RequestController {
 
     @GetMapping
     public Flux<Request> list(
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        return service.list(type, from, to);
+        return service.list();
     }
 
     @GetMapping("/{id}")
     public Mono<RequestService.RequestDetail> detail(@PathVariable Integer id) {
         return service.detail(id);
     }
+
+    @PutMapping("/{id}")
+    public Mono<Request> update(
+            @PathVariable Integer id,
+            @Valid @RequestBody RequestWithContacts dto
+    ) {
+        return service.updateWithContacts(id, dto.request(), dto.contacts());
+    }
+
+    @DeleteMapping("/{id}")
+    public Mono<Void> delete(@PathVariable Integer id) {
+        return service.deleteRequest(id);
+    }
+
 
     @GetMapping("/export")
     public Mono<ResponseEntity<Flux<DataBuffer>>> export() {

@@ -12,7 +12,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -34,18 +33,8 @@ public class RequestService {
                 );
     }
 
-    public Flux<Request> list(String type, LocalDate from, LocalDate to) {
-        if (type != null && from != null && to != null) {
-            return repo.findAllByRequestType(type)
-                    .filter(r -> !r.getSubmissionDate().isBefore(from) &&
-                            !r.getSubmissionDate().isAfter(to));
-        } else if (type != null) {
-            return repo.findAllByRequestType(type);
-        } else if (from != null && to != null) {
-            return repo.findAllBySubmissionDateBetween(from, to);
-        } else {
+    public Flux<Request> list() {
             return repo.findAll();
-        }
     }
 
     public Mono<RequestDetail> detail(Integer id) {
@@ -53,6 +42,30 @@ public class RequestService {
         Flux<RequestContact> c = contactRepo.findAllByRequestId(id);
         return r.zipWith(c.collectList())
                 .map(t -> new RequestDetail(t.getT1(), t.getT2()));
+    }
+
+    public Mono<Request> updateWithContacts(Integer id, Request req, List<RequestContact> extras) {
+        req.setId(id);
+        return repo.save(req)
+                .flatMap(updated ->
+                        contactRepo.findAllByRequestId(id)
+                                .flatMap(contactRepo::delete)
+                                .thenMany(
+                                        Flux.fromIterable(extras)
+                                                .map(c -> new RequestContact(
+                                                        null,
+                                                        id,
+                                                        c.getContactName(),
+                                                        c.getContactPhone()
+                                                ))
+                                                .flatMap(contactRepo::save)
+                                )
+                                .then(Mono.just(req))
+                );
+    }
+
+    public Mono<Void> deleteRequest(Integer id) {
+        return repo.deleteById(id);
     }
 
     public Flux<DataBuffer> exportCsv() {
