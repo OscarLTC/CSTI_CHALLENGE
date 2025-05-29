@@ -32,7 +32,8 @@ export const RequestsPage = () => {
         <RequestTable
           data={requests}
           loading={loading}
-          onRowClick={(req) => navigate(`/requests/${req.id}`)}
+          onView={(req) => navigate(`/requests/${req.id}`)}
+          onEdit={(req) => navigate(`/requests/${req.id}/edit`)}
           onDelete={deleteRequest}
         />
       </div>

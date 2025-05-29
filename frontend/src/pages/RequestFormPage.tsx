@@ -3,8 +3,7 @@ import { PageHeader } from "../components/PageHeader";
 import { RequestForm } from "../components/RequestForm";
 
 export const RequestFormPage = () => {
-  const { id } = useParams();
-
+  const { id } = useParams<{ id: string }>();
   return (
     <div className="h-screen flex flex-col p-6 bg-gray-50">
       <div className="flex flex-col gap-4">

@@ -1,5 +1,5 @@
 import api from "../api";
-import type { Request } from "../models/Request";
+import type { Request, Response } from "../models/Request";
 import type { RequestContact } from "../models/RequestContact";
 
 interface RequestPayload {
@@ -12,8 +12,8 @@ export async function listRequests(): Promise<Request[]> {
   return res.data;
 }
 
-export async function getRequest(id: number): Promise<Request> {
-  const res = await api.get<Request>(`/requests/${id}`);
+export async function getRequest(id: number): Promise<Response> {
+  const res = await api.get<Response>(`/requests/${id}`);
   return res.data;
 }
 
